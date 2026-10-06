@@ -22,6 +22,35 @@ namespace AccountingProject.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("AccountingProject.Entities.Budget", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("MonthlyLimit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PoolAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Budgets");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            MonthlyLimit = 30000m,
+                            PoolAmount = 600000m
+                        });
+                });
+
             modelBuilder.Entity("AccountingProject.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -109,6 +138,146 @@ namespace AccountingProject.Migrations
                             Id = 11,
                             Name = "Diğer gider",
                             Type = "Expense"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "Kira geliri",
+                            Type = "Income"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Name = "Hediye",
+                            Type = "Income"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Name = "Abonelik",
+                            Type = "Expense"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Name = "Giyim",
+                            Type = "Expense"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Name = "Eğitim",
+                            Type = "Expense"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Name = "Tatil",
+                            Type = "Expense"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Name = "Borç ödemesi",
+                            Type = "Expense"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Name = "Ev kirası",
+                            Type = "FixedExpense"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Name = "Elektrik, su, internet",
+                            Type = "FixedExpense"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Name = "Dijital abonelikler",
+                            Type = "FixedExpense"
+                        });
+                });
+
+            modelBuilder.Entity("AccountingProject.Entities.Debt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Creditor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Debts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Amount = 150000m,
+                            Creditor = "Banka kredisi"
+                        });
+                });
+
+            modelBuilder.Entity("AccountingProject.Entities.FixedExpense", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DayOfMonth")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("FixedExpenses");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Amount = 16000m,
+                            CategoryId = 19,
+                            DayOfMonth = 3
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Amount = 3200m,
+                            CategoryId = 20,
+                            DayOfMonth = 10
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Amount = 650m,
+                            CategoryId = 21,
+                            DayOfMonth = 5
                         });
                 });
 
@@ -126,9 +295,20 @@ namespace AccountingProject.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("DebtId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FixedExpenseId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<DateTime>("TransactionDate")
                         .HasColumnType("datetime2");
@@ -136,6 +316,10 @@ namespace AccountingProject.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("DebtId");
+
+                    b.HasIndex("FixedExpenseId");
 
                     b.ToTable("Transactions");
 
@@ -146,6 +330,7 @@ namespace AccountingProject.Migrations
                             Amount = 48000m,
                             CategoryId = 1,
                             Note = "Aylık maaş",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -154,6 +339,7 @@ namespace AccountingProject.Migrations
                             Amount = 11047m,
                             CategoryId = 2,
                             Note = "Proje ödemesi",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 4, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -162,6 +348,7 @@ namespace AccountingProject.Migrations
                             Amount = 16000m,
                             CategoryId = 5,
                             Note = "Ev kirası",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 4, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -170,6 +357,7 @@ namespace AccountingProject.Migrations
                             Amount = 2939m,
                             CategoryId = 7,
                             Note = "Elektrik, su, internet",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -178,6 +366,7 @@ namespace AccountingProject.Migrations
                             Amount = 7732m,
                             CategoryId = 6,
                             Note = "Aylık market",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 4, 12, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -186,6 +375,7 @@ namespace AccountingProject.Migrations
                             Amount = 1855m,
                             CategoryId = 8,
                             Note = "Ulaşım kartı ve yakıt",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 4, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -194,6 +384,7 @@ namespace AccountingProject.Migrations
                             Amount = 2719m,
                             CategoryId = 9,
                             Note = "Sinema, dışarıda yemek",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 4, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -202,6 +393,7 @@ namespace AccountingProject.Migrations
                             Amount = 48000m,
                             CategoryId = 1,
                             Note = "Aylık maaş",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -210,6 +402,7 @@ namespace AccountingProject.Migrations
                             Amount = 11305m,
                             CategoryId = 2,
                             Note = "Proje ödemesi",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -218,6 +411,7 @@ namespace AccountingProject.Migrations
                             Amount = 16000m,
                             CategoryId = 5,
                             Note = "Ev kirası",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 5, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -226,6 +420,7 @@ namespace AccountingProject.Migrations
                             Amount = 3293m,
                             CategoryId = 7,
                             Note = "Elektrik, su, internet",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -234,6 +429,7 @@ namespace AccountingProject.Migrations
                             Amount = 7853m,
                             CategoryId = 6,
                             Note = "Aylık market",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 5, 12, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -242,6 +438,7 @@ namespace AccountingProject.Migrations
                             Amount = 2125m,
                             CategoryId = 8,
                             Note = "Ulaşım kartı ve yakıt",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 5, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -250,6 +447,7 @@ namespace AccountingProject.Migrations
                             Amount = 3172m,
                             CategoryId = 9,
                             Note = "Sinema, dışarıda yemek",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 5, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -258,6 +456,7 @@ namespace AccountingProject.Migrations
                             Amount = 48000m,
                             CategoryId = 1,
                             Note = "Aylık maaş",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -266,6 +465,7 @@ namespace AccountingProject.Migrations
                             Amount = 8116m,
                             CategoryId = 2,
                             Note = "Proje ödemesi",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -274,6 +474,7 @@ namespace AccountingProject.Migrations
                             Amount = 16000m,
                             CategoryId = 5,
                             Note = "Ev kirası",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 6, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -282,6 +483,7 @@ namespace AccountingProject.Migrations
                             Amount = 3606m,
                             CategoryId = 7,
                             Note = "Elektrik, su, internet",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -290,6 +492,7 @@ namespace AccountingProject.Migrations
                             Amount = 7474m,
                             CategoryId = 6,
                             Note = "Aylık market",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 6, 12, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -298,6 +501,7 @@ namespace AccountingProject.Migrations
                             Amount = 1948m,
                             CategoryId = 8,
                             Note = "Ulaşım kartı ve yakıt",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -306,6 +510,7 @@ namespace AccountingProject.Migrations
                             Amount = 2662m,
                             CategoryId = 9,
                             Note = "Sinema, dışarıda yemek",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 6, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -314,6 +519,7 @@ namespace AccountingProject.Migrations
                             Amount = 48000m,
                             CategoryId = 1,
                             Note = "Aylık maaş",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -322,6 +528,7 @@ namespace AccountingProject.Migrations
                             Amount = 16000m,
                             CategoryId = 5,
                             Note = "Ev kirası",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 7, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -330,6 +537,7 @@ namespace AccountingProject.Migrations
                             Amount = 3927m,
                             CategoryId = 7,
                             Note = "Elektrik, su, internet",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 7, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -338,6 +546,7 @@ namespace AccountingProject.Migrations
                             Amount = 9910m,
                             CategoryId = 6,
                             Note = "Aylık market",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 7, 12, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -346,6 +555,7 @@ namespace AccountingProject.Migrations
                             Amount = 1597m,
                             CategoryId = 8,
                             Note = "Ulaşım kartı ve yakıt",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -354,6 +564,7 @@ namespace AccountingProject.Migrations
                             Amount = 2533m,
                             CategoryId = 9,
                             Note = "Sinema, dışarıda yemek",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 7, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -362,6 +573,7 @@ namespace AccountingProject.Migrations
                             Amount = 1084m,
                             CategoryId = 10,
                             Note = "Eczane",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 7, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -370,6 +582,7 @@ namespace AccountingProject.Migrations
                             Amount = 48000m,
                             CategoryId = 1,
                             Note = "Aylık maaş",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -378,6 +591,7 @@ namespace AccountingProject.Migrations
                             Amount = 10953m,
                             CategoryId = 2,
                             Note = "Proje ödemesi",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 8, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -386,6 +600,7 @@ namespace AccountingProject.Migrations
                             Amount = 16000m,
                             CategoryId = 5,
                             Note = "Ev kirası",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 8, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -394,6 +609,7 @@ namespace AccountingProject.Migrations
                             Amount = 3606m,
                             CategoryId = 7,
                             Note = "Elektrik, su, internet",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 8, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -402,6 +618,7 @@ namespace AccountingProject.Migrations
                             Amount = 7842m,
                             CategoryId = 6,
                             Note = "Aylık market",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 8, 12, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -410,6 +627,7 @@ namespace AccountingProject.Migrations
                             Amount = 1636m,
                             CategoryId = 8,
                             Note = "Ulaşım kartı ve yakıt",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 8, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -418,6 +636,7 @@ namespace AccountingProject.Migrations
                             Amount = 4157m,
                             CategoryId = 9,
                             Note = "Sinema, dışarıda yemek",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 8, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -426,6 +645,7 @@ namespace AccountingProject.Migrations
                             Amount = 48000m,
                             CategoryId = 1,
                             Note = "Aylık maaş",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -434,6 +654,7 @@ namespace AccountingProject.Migrations
                             Amount = 16000m,
                             CategoryId = 5,
                             Note = "Ev kirası",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -442,6 +663,7 @@ namespace AccountingProject.Migrations
                             Amount = 3456m,
                             CategoryId = 7,
                             Note = "Elektrik, su, internet",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -450,6 +672,7 @@ namespace AccountingProject.Migrations
                             Amount = 7991m,
                             CategoryId = 6,
                             Note = "Aylık market",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -458,6 +681,7 @@ namespace AccountingProject.Migrations
                             Amount = 1623m,
                             CategoryId = 8,
                             Note = "Ulaşım kartı ve yakıt",
+                            PaymentType = "0",
                             TransactionDate = new DateTime(2026, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -466,19 +690,90 @@ namespace AccountingProject.Migrations
                             Amount = 3519m,
                             CategoryId = 9,
                             Note = "Sinema, dışarıda yemek",
+                            PaymentType = "0",
+                            TransactionDate = new DateTime(2026, 9, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 42,
+                            Amount = 10000m,
+                            CategoryId = 18,
+                            DebtId = 1,
+                            Note = "Borç ödemesi: Banka kredisi",
+                            PaymentType = "Transfer",
+                            TransactionDate = new DateTime(2026, 7, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 43,
+                            Amount = 10000m,
+                            CategoryId = 18,
+                            DebtId = 1,
+                            Note = "Borç ödemesi: Banka kredisi",
+                            PaymentType = "Transfer",
+                            TransactionDate = new DateTime(2026, 8, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 44,
+                            Amount = 10000m,
+                            CategoryId = 18,
+                            DebtId = 1,
+                            Note = "Borç ödemesi: Banka kredisi",
+                            PaymentType = "Transfer",
                             TransactionDate = new DateTime(2026, 9, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
-            modelBuilder.Entity("AccountingProject.Entities.Transaction", b =>
+            modelBuilder.Entity("AccountingProject.Entities.FixedExpense", b =>
                 {
                     b.HasOne("AccountingProject.Entities.Category", "Category")
-                        .WithMany()
+                        .WithMany("FixedExpenses")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("AccountingProject.Entities.Transaction", b =>
+                {
+                    b.HasOne("AccountingProject.Entities.Category", "Category")
+                        .WithMany("Transactions")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AccountingProject.Entities.Debt", "Debt")
+                        .WithMany("Transactions")
+                        .HasForeignKey("DebtId");
+
+                    b.HasOne("AccountingProject.Entities.FixedExpense", "FixedExpense")
+                        .WithMany("Transactions")
+                        .HasForeignKey("FixedExpenseId");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Debt");
+
+                    b.Navigation("FixedExpense");
+                });
+
+            modelBuilder.Entity("AccountingProject.Entities.Category", b =>
+                {
+                    b.Navigation("FixedExpenses");
+
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("AccountingProject.Entities.Debt", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("AccountingProject.Entities.FixedExpense", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

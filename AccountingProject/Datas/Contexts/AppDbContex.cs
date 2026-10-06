@@ -11,12 +11,16 @@ namespace AccountingProject.Datas.Contexts
 		}
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Transaction> Transactions { get; set; }
+		public DbSet<FixedExpense> FixedExpenses { get; set; }
+		public DbSet<Debt> Debts { get; set; }
+		public DbSet<Budget> Budgets { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Category>().Property(c => c.Type).HasConversion<string>().HasMaxLength(50);
+			modelBuilder.Entity<Transaction>().Property(c => c.PaymentType).HasConversion<string>().HasMaxLength(10);
 
-			//Category seed datas
+			//Category
 
 			modelBuilder.Entity<Category>().HasData(
 		   new Category { Id = 1, Name = "Maaş", Type = Type.Income },
@@ -29,11 +33,47 @@ namespace AccountingProject.Datas.Contexts
 		   new Category { Id = 8, Name = "Ulaşım", Type = Type.Expense },
 		   new Category { Id = 9, Name = "Eğlence", Type = Type.Expense },
 		   new Category { Id = 10, Name = "Sağlık", Type = Type.Expense },
-		   new Category { Id = 11, Name = "Diğer gider", Type = Type.Expense });
+		   new Category { Id = 11, Name = "Diğer gider", Type = Type.Expense },
+		   new Category { Id = 12, Name = "Kira geliri", Type = Type.Income },
+			new Category { Id = 13, Name = "Hediye", Type = Type.Income },
+			new Category { Id = 14, Name = "Abonelik", Type = Type.Expense },
+			new Category { Id = 15, Name = "Giyim", Type = Type.Expense },
+			new Category { Id = 16, Name = "Eğitim", Type = Type.Expense },
+			new Category { Id = 17, Name = "Tatil", Type = Type.Expense },
+			new Category { Id = 18, Name = "Borç ödemesi", Type = Type.Expense },
+			new Category { Id = 19, Name = "Ev kirası", Type = Type.FixedExpense },
+			new Category { Id = 20, Name = "Elektrik, su, internet", Type = Type.FixedExpense },
+			new Category { Id = 21, Name = "Dijital abonelikler", Type = Type.FixedExpense }
+			);
 
-			//Transaction Seed datas
+			//Transaction
 
 			modelBuilder.Entity<Transaction>().HasData(TransactionSeedData.Items);
+			modelBuilder.Entity<Transaction>().HasOne(t => t.Category).WithMany(t => t.Transactions).HasForeignKey(x => x.CategoryId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			//Budget
+
+			modelBuilder.Entity<Budget>().Property(x => x.MonthlyLimit).IsRequired().HasPrecision(18, 2);
+			modelBuilder.Entity<Budget>().Property(x => x.PoolAmount).IsRequired().HasPrecision(18, 2);
+
+			modelBuilder.Entity<Budget>().HasData(new Budget { Id = 1, PoolAmount = 600000m, MonthlyLimit = 30000m });
+
+			//Fixed Expense
+
+			modelBuilder.Entity<FixedExpense>().Property(f => f.Amount).IsRequired().HasPrecision(18, 2);
+
+			modelBuilder.Entity<FixedExpense>().HasData(
+			new FixedExpense { Id = 1, CategoryId = 19, Amount = 16000m,  DayOfMonth = 3 },
+			new FixedExpense { Id = 2, CategoryId = 20, Amount = 3200m, DayOfMonth = 10 },
+			new FixedExpense { Id = 3, CategoryId = 21, Amount = 650m, DayOfMonth = 5 });
+
+			//Debt
+
+			modelBuilder.Entity<Debt>().Property(d => d.Amount).IsRequired().HasPrecision(18, 2);
+			modelBuilder.Entity<Debt>().Property(d => d.DueDate).HasColumnType("date");
+			modelBuilder.Entity<Debt>().HasData(new Debt { Id = 1, Creditor = "Banka kredisi", Amount = 150000m });
+
 		}
 	}
 
@@ -82,6 +122,9 @@ namespace AccountingProject.Datas.Contexts
 		new() { Id = 39, CategoryId = 6, Amount = 7991m, TransactionDate = new DateTime(2026, 9, 12), Note = "Aylık market" },
 		new() { Id = 40, CategoryId = 8, Amount = 1623m, TransactionDate = new DateTime(2026, 9, 8), Note = "Ulaşım kartı ve yakıt" },
 		new() { Id = 41, CategoryId = 9, Amount = 3519m, TransactionDate = new DateTime(2026, 9, 20), Note = "Sinema, dışarıda yemek" },
+		new() { Id = 42, CategoryId = 18, Amount = 10000m, TransactionDate = new DateTime(2026, 7, 20), PaymentType = PaymentMethodType.Transfer, DebtId = 1, Note = "Borç ödemesi: Banka kredisi" },
+		new() { Id = 43, CategoryId = 18, Amount = 10000m, TransactionDate = new DateTime(2026, 8, 20), PaymentType = PaymentMethodType.Transfer, DebtId = 1, Note = "Borç ödemesi: Banka kredisi" },
+		new() { Id = 44, CategoryId = 18, Amount = 10000m, TransactionDate = new DateTime(2026, 9, 20), PaymentType = PaymentMethodType.Transfer, DebtId = 1, Note = "Borç ödemesi: Banka kredisi" },
 	};
 	}
 }
