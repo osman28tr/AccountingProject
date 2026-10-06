@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <title>Muhasebe | Genel Bakış</title>
+    <script>
+              (() => {
+                const root = document.documentElement;
+                let stored = null;
+                try { stored = localStorage.getItem('lte-theme'); } catch {}
+                const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+                root.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+              })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <!-- Yerel css/js dosyalarınız varsa bu iki yolu ./css/adminlte.css ve ./js/adminlte.js ile değiştirebilirsiniz -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4/dist/css/adminlte.min.css" />
+</head>
+
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+        <!--begin::Header-->
+        <nav class="app-header navbar navbar-expand bg-body">
+            <div class="container-fluid">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="Menüyü aç/kapat"><i class="bi bi-list"></i></a>
+                    </li>
+                    <li class="nav-item d-none d-md-block">
+                        <a href="#" class="nav-link text-success" data-add="gelir" data-bs-toggle="modal" data-bs-target="#txModal">
+                            <i class="bi bi-plus-circle me-1"></i>Yeni gelir
+                        </a>
+                    </li>
+                    <li class="nav-item d-none d-md-block">
+                        <a href="#" class="nav-link text-danger" data-add="gider" data-bs-toggle="modal" data-bs-target="#txModal">
+                            <i class="bi bi-dash-circle me-1"></i>Yeni gider
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-lte-toggle="fullscreen" aria-label="Tam ekran">
+                            <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+                            <i data-lte-icon="minimize" class="bi bi-fullscreen-exit d-none"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" id="bd-theme" aria-label="Tema" data-bs-toggle="dropdown">
+                            <i class="bi bi-sun-fill" data-lte-theme-icon="light"></i>
+                            <i class="bi bi-moon-fill d-none" data-lte-theme-icon="dark"></i>
+                            <i class="bi bi-circle-half d-none" data-lte-theme-icon="auto"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="--bs-dropdown-min-width: 8rem">
+                            <li><button type="button" class="dropdown-item" data-bs-theme-value="light"><i class="bi bi-sun-fill me-2"></i>Açık</button></li>
+                            <li><button type="button" class="dropdown-item" data-bs-theme-value="dark"><i class="bi bi-moon-fill me-2"></i>Koyu</button></li>
+                            <li><button type="button" class="dropdown-item active" data-bs-theme-value="auto"><i class="bi bi-circle-half me-2"></i>Otomatik</button></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown user-menu">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle fs-5 me-1"></i><span class="d-none d-md-inline">Hesabım</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" id="loadDemo"><i class="bi bi-database-add me-2"></i>Örnek veri yükle</a></li>
+                            <li><a class="dropdown-item text-danger" href="#" id="clearAll"><i class="bi bi-trash me-2"></i>Tüm verileri sil</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <!--end::Header-->
+        <!--begin::Sidebar-->
+        <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+            <div class="sidebar-brand">
+                <a href="#" class="brand-link">
+                    <i class="bi bi-wallet2 brand-image fs-4 text-white"></i>
+                    <span class="brand-text fw-light">Muhasebe</span>
+                </a>
+            </div>
+            <div class="sidebar-wrapper">
+                <nav class="mt-2" aria-label="Ana menü">
+                    <ul class="nav sidebar-menu flex-column" id="navigation">
+                        <li class="nav-item"><a href="#" class="nav-link active" id="navDash"><i class="nav-icon bi bi-speedometer"></i><p>Genel bakış</p></a></li>
+                        <li class="nav-header">İŞLEMLER</li>
+                        <li class="nav-item"><a href="#islemler" class="nav-link" data-filter="hepsi"><i class="nav-icon bi bi-list-ul"></i><p>Tüm işlemler</p></a></li>
+                        <li class="nav-item"><a href="#islemler" class="nav-link" data-filter="gelir"><i class="nav-icon bi bi-arrow-down-circle text-success"></i><p>Gelirler</p></a></li>
+                        <li class="nav-item"><a href="#islemler" class="nav-link" data-filter="gider"><i class="nav-icon bi bi-arrow-up-circle text-danger"></i><p>Giderler</p></a></li>
+                        <li class="nav-header">HIZLI EKLE</li>
+                        <li class="nav-item"><a href="#" class="nav-link" data-add="gelir" data-bs-toggle="modal" data-bs-target="#txModal"><i class="nav-icon bi bi-plus-circle"></i><p>Gelir ekle</p></a></li>
+                        <li class="nav-item"><a href="#" class="nav-link" data-add="gider" data-bs-toggle="modal" data-bs-target="#txModal"><i class="nav-icon bi bi-dash-circle"></i><p>Gider ekle</p></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <!--end::Sidebar-->
+        <!--begin::App Main-->
+        <main class="app-main">
+            <div class="app-content-header">
+                <div class="container-fluid">
+                    <div class="row align-items-center g-2">
+                        <div class="col-sm-6"><h1 class="mb-0 fs-3">Genel bakış</h1></div>
+                        <div class="col-sm-6 d-flex justify-content-sm-end gap-2">
+                            <input type="month" id="month" class="form-control w-auto" aria-label="Ay seç" />
+                            <button class="btn btn-success" data-add="gelir" data-bs-toggle="modal" data-bs-target="#txModal"><i class="bi bi-plus-lg"></i> Gelir</button>
+                            <button class="btn btn-danger" data-add="gider" data-bs-toggle="modal" data-bs-target="#txModal"><i class="bi bi-plus-lg"></i> Gider</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-content">
+                <div class="container-fluid">
+                    <!-- Özet kutuları -->
+                    <div class="row">
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="info-box">
+                                <span class="info-box-icon text-bg-success shadow-sm"><i class="bi bi-arrow-down-circle-fill"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Aylık gelir</span>
+                                    <span class="info-box-number" id="kIncome">-</span>
+                                    <small class="text-secondary" id="dIncome"></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="info-box">
+                                <span class="info-box-icon text-bg-danger shadow-sm"><i class="bi bi-arrow-up-circle-fill"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Aylık gider</span>
+                                    <span class="info-box-number" id="kExpense">-</span>
+                                    <small class="text-secondary" id="dExpense"></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="info-box">
+                                <span class="info-box-icon text-bg-primary shadow-sm" id="netIcon"><i class="bi bi-wallet-fill"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Kalan (net)</span>
+                                    <span class="info-box-number" id="kNet">-</span>
+                                    <small class="text-secondary">Gelir - gider</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="info-box">
+                                <span class="info-box-icon text-bg-warning shadow-sm"><i class="bi bi-piggy-bank-fill"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Tasarruf oranı</span>
+                                    <span class="info-box-number" id="kRate">-</span>
+                                    <small class="text-secondary">Gelirin ne kadarı kaldı</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grafikler -->
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="card-title">Son 12 ay: gelir, gider ve net</h5></div>
+                                <div class="card-body"><div id="trendChart"></div></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="card-title">Gider dağılımı</h5></div>
+                                <div class="card-body"><div id="catChart"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İstatistikler + tablo -->
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="card-title">Aylık ortalamalar</h5></div>
+                                <div class="card-body">
+                                    <p class="text-secondary small mb-3" id="avgNote"></p>
+                                    <div class="d-flex justify-content-between mb-2"><span>Ortalama gelir</span><strong class="text-success" id="aIncome">-</strong></div>
+                                    <div class="d-flex justify-content-between mb-2"><span>Ortalama gider</span><strong class="text-danger" id="aExpense">-</strong></div>
+                                    <div class="d-flex justify-content-between mb-3"><span>Ortalama kalan</span><strong id="aNet">-</strong></div>
+                                    <hr />
+                                    <p class="text-center mb-2"><strong>En çok harcanan kategoriler</strong></p>
+                                    <div id="topCats"></div>
+                                    <div class="small text-secondary mt-3" id="biggest"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8" id="islemler">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title">İşlemler</h5>
+                                    <div class="card-tools btn-group btn-group-sm">
+                                        <button class="btn btn-outline-secondary active" data-filter="hepsi">Tümü</button>
+                                        <button class="btn btn-outline-secondary" data-filter="gelir">Gelir</button>
+                                        <button class="btn btn-outline-secondary" data-filter="gider">Gider</button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0 table-responsive">
+                                    <table class="table table-striped align-middle mb-0">
+                                        <thead>
+                                            <tr><th>Tarih</th><th>Tür</th><th>Kategori</th><th>Açıklama</th><th class="text-end">Tutar</th><th></th></tr>
+                                        </thead>
+                                        <tbody id="rows"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!--end::App Main-->
+
+        <footer class="app-footer">
+            <div class="float-end d-none d-sm-inline">Veriler bu tarayıcıda saklanır</div>
+            <strong>Muhasebe</strong> &copy; <span id="year"></span>
+        </footer>
+    </div>
+
+    <!-- İşlem ekleme penceresi -->
+    <div class="modal fade" id="txModal" tabindex="-1" aria-labelledby="txTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" id="txForm" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="txTitle">Yeni işlem</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="btn-group w-100 mb-3" role="group" aria-label="İşlem türü">
+                        <input type="radio" class="btn-check" name="type" id="tGelir" value="gelir" checked />
+                        <label class="btn btn-outline-success" for="tGelir">Gelir</label>
+                        <input type="radio" class="btn-check" name="type" id="tGider" value="gider" />
+                        <label class="btn btn-outline-danger" for="tGider">Gider</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fAmount" class="form-label">Tutar (₺)</label>
+                        <input type="number" id="fAmount" class="form-control" min="0.01" step="0.01" required />
+                        <div class="invalid-feedback">0'dan büyük bir tutar girin.</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label for="fCat" class="form-label">Kategori</label>
+                            <select id="fCat" class="form-select"></select>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="fDate" class="form-label">Tarih</label>
+                            <input type="date" id="fDate" class="form-control" required />
+                            <div class="invalid-feedback">Tarih seçin.</div>
+                        </div>
+                    </div>
+                    <div class="mb-1">
+                        <label for="fNote" class="form-label">Açıklama (isteğe bağlı)</label>
+                        <input type="text" id="fNote" class="form-control" maxlength="80" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@4/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"></script>
+    <script>
+              // Grafikler açık/koyu temayı takip eder
+              (() => {
+                const mode = () => (document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light');
+                globalThis.Apex ||= {};
+                Apex.theme = { mode: mode() };
+                Apex.chart = Object.assign(Apex.chart || {}, { background: 'transparent' });
+                new MutationObserver(() => {
+                  Apex.theme = { mode: mode() };
+                  for (const { chart } of Apex._chartInstances || []) chart.updateOptions({ theme: { mode: mode() } }, false, false);
+                }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
+              })();
+
+              // ---------- Veri ----------
+              const KEY = 'muhasebe-islemler';
+              const CATS = {
+                gelir: ['Maaş', 'Serbest iş', 'Yatırım', 'Diğer gelir'],
+                gider: ['Kira', 'Market', 'Faturalar', 'Ulaşım', 'Eğlence', 'Sağlık', 'Diğer gider'],
+              };
+              const $ = (s) => document.querySelector(s);
+              const p2 = (n) => String(n).padStart(2, '0');
+              const fmt = (n) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+              const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+              const shift = (m, n) => { const [y, mo] = m.split('-').map(Number); const d = new Date(y, mo - 1 + n, 1); return d.getFullYear() + '-' + p2(d.getMonth() + 1); };
+              const monthLabel = (m) => { const [y, mo] = m.split('-').map(Number); return new Date(y, mo - 1, 1).toLocaleDateString('tr-TR', { month: 'short', year: '2-digit' }); };
+
+              function demo() {
+                const out = []; let r = 7; const rnd = () => (r = (r * 9301 + 49297) % 233280) / 233280;
+                const now = new Date();
+                for (let i = 5; i >= 0; i--) {
+                  const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                  const m = d.getFullYear() + '-' + p2(d.getMonth() + 1);
+                  const add = (type, category, amount, day, note) =>
+                    out.push({ id: m + category + day, type, category, amount: Math.round(amount), date: m + '-' + p2(day), note });
+                  add('gelir', 'Maaş', 48000, 1, 'Aylık maaş');
+                  if (rnd() > 0.4) add('gelir', 'Serbest iş', 6000 + rnd() * 9000, 15, 'Proje ödemesi');
+                  add('gider', 'Kira', 16000, 3, 'Ev kirası');
+                  add('gider', 'Faturalar', 2800 + rnd() * 1200, 10, 'Elektrik, su, internet');
+                  add('gider', 'Market', 7000 + rnd() * 3000, 12, 'Aylık market');
+                  add('gider', 'Ulaşım', 1500 + rnd() * 800, 8, 'Ulaşım kartı ve yakıt');
+                  add('gider', 'Eğlence', 1200 + rnd() * 3000, 20, 'Sinema, dışarıda yemek');
+                  if (rnd() > 0.5) add('gider', 'Sağlık', 800 + rnd() * 1500, 18, 'Eczane');
+                }
+                return out;
+              }
+              let tx;
+              try { tx = JSON.parse(localStorage.getItem(KEY)); } catch { tx = null; }
+              if (!Array.isArray(tx)) tx = demo();
+              const save = () => { try { localStorage.setItem(KEY, JSON.stringify(tx)); } catch {} };
+
+              let filter = 'hepsi';
+              const today = new Date();
+              $('#month').value = today.getFullYear() + '-' + p2(today.getMonth() + 1);
+              $('#year').textContent = today.getFullYear();
+
+              const sum = (type, m) => tx.filter((x) => x.type === type && x.date.startsWith(m)).reduce((a, x) => a + x.amount, 0);
+              const delta = (cur, prev) => (prev === 0 ? 'Geçen ay kayıt yok' : (cur >= prev ? '▲ %' : '▼ %') + Math.abs(Math.round(((cur - prev) / prev) * 100)) + ' geçen aya göre');
+
+              // ---------- Grafikler ----------
+              const trend = new ApexCharts($('#trendChart'), {
+                chart: { id: 'trend', type: 'line', height: 320, toolbar: { show: false } },
+                series: [],
+                colors: ['#198754', '#dc3545', '#0d6efd'],
+                stroke: { width: [0, 0, 3], curve: 'smooth' },
+                plotOptions: { bar: { columnWidth: '55%', borderRadius: 3 } },
+                dataLabels: { enabled: false },
+                xaxis: { categories: [] },
+                yaxis: { labels: { formatter: (v) => Math.round(v / 1000) + 'B' } },
+                tooltip: { y: { formatter: fmt } },
+                noData: { text: 'Veri yok' },
+              });
+              const cat = new ApexCharts($('#catChart'), {
+                chart: { id: 'cat', type: 'donut', height: 320 },
+                series: [], labels: [],
+                colors: ['#0d6efd', '#20c997', '#ffc107', '#d63384', '#6f42c1', '#fd7e14', '#adb5bd'],
+                dataLabels: { enabled: false },
+                legend: { position: 'bottom' },
+                tooltip: { y: { formatter: fmt } },
+                noData: { text: 'Bu ay gider yok' },
+              });
+              trend.render(); cat.render();
+
+              // ---------- Ekrana çizme ----------
+              function render() {
+                const m = $('#month').value || today.toISOString().slice(0, 7);
+                const pm = shift(m, -1);
+                const inc = sum('gelir', m), exp = sum('gider', m), net = inc - exp;
+                $('#kIncome').textContent = fmt(inc);
+                $('#kExpense').textContent = fmt(exp);
+                $('#kNet').textContent = fmt(net);
+                $('#kNet').className = 'info-box-number ' + (net < 0 ? 'text-danger' : '');
+                $('#netIcon').className = 'info-box-icon shadow-sm ' + (net < 0 ? 'text-bg-danger' : 'text-bg-primary');
+                $('#kRate').textContent = inc > 0 ? '%' + Math.round((net / inc) * 100) : '-';
+                $('#dIncome').textContent = delta(inc, sum('gelir', pm));
+                $('#dExpense').textContent = delta(exp, sum('gider', pm));
+
+                // 12 aylık trend
+                const ms = Array.from({ length: 12 }, (_, i) => shift(m, i - 11));
+                const incs = ms.map((x) => sum('gelir', x)), exps = ms.map((x) => sum('gider', x));
+                trend.updateOptions({
+                  series: [
+                    { name: 'Gelir', type: 'column', data: incs },
+                    { name: 'Gider', type: 'column', data: exps },
+                    { name: 'Net', type: 'line', data: incs.map((v, i) => v - exps[i]) },
+                  ],
+                  xaxis: { categories: ms.map(monthLabel) },
+                });
+
+                // Ortalamalar (kaydı olan aylar üzerinden)
+                const active = ms.filter((_, i) => incs[i] || exps[i]).length || 1;
+                const ai = incs.reduce((a, b) => a + b, 0) / active, ae = exps.reduce((a, b) => a + b, 0) / active;
+                $('#avgNote').textContent = 'Son 12 ayda kaydı olan ' + active + ' ay üzerinden hesaplandı.';
+                $('#aIncome').textContent = fmt(ai);
+                $('#aExpense').textContent = fmt(ae);
+                $('#aNet').textContent = fmt(ai - ae);
+                $('#aNet').className = ai - ae < 0 ? 'text-danger' : 'text-primary';
+
+                // Kategori dağılımı
+                const by = {};
+                tx.filter((x) => x.type === 'gider' && x.date.startsWith(m)).forEach((x) => (by[x.category] = (by[x.category] || 0) + x.amount));
+                const list = Object.entries(by).sort((a, b) => b[1] - a[1]);
+                cat.updateOptions({ series: list.map((e) => e[1]), labels: list.map((e) => e[0]) });
+                $('#topCats').innerHTML = list.length
+                  ? list.slice(0, 5).map(([k, v]) => {
+                      const pc = Math.round((v / exp) * 100);
+                      return '<div class="progress-group">' + esc(k) + '<span class="float-end"><b>' + fmt(v) + '</b> (%' + pc + ')</span>' +
+                        '<div class="progress progress-sm"><div class="progress-bar text-bg-danger" style="width:' + pc + '%"></div></div></div>';
+                    }).join('')
+                  : '<p class="text-secondary text-center">Bu ay henüz gider yok.</p>';
+                const big = tx.filter((x) => x.type === 'gider' && x.date.startsWith(m)).sort((a, b) => b.amount - a.amount)[0];
+                $('#biggest').textContent = big ? 'En büyük gider: ' + fmt(big.amount) + ' (' + big.category + (big.note ? ', ' + big.note : '') + ')' : '';
+
+                // Tablo
+                const rows = tx.filter((x) => x.date.startsWith(m) && (filter === 'hepsi' || x.type === filter)).sort((a, b) => b.date.localeCompare(a.date));
+                $('#rows').innerHTML = rows.length
+                  ? rows.map((x) =>
+                      '<tr><td>' + new Date(x.date + 'T00:00').toLocaleDateString('tr-TR') + '</td>' +
+                      '<td><span class="badge text-bg-' + (x.type === 'gelir' ? 'success' : 'danger') + '">' + (x.type === 'gelir' ? 'Gelir' : 'Gider') + '</span></td>' +
+                      '<td>' + esc(x.category) + '</td><td>' + esc(x.note || '') + '</td>' +
+                      '<td class="text-end fw-semibold text-' + (x.type === 'gelir' ? 'success' : 'danger') + '">' + (x.type === 'gelir' ? '+' : '-') + fmt(x.amount) + '</td>' +
+                      '<td class="text-end"><button class="btn btn-sm btn-outline-secondary" data-del="' + esc(x.id) + '" aria-label="Sil"><i class="bi bi-trash"></i></button></td></tr>').join('')
+                  : '<tr><td colspan="6" class="text-center text-secondary py-4">Bu ay için kayıt yok. Sağ üstteki "Gelir" veya "Gider" ile ilk kaydı ekleyin.</td></tr>';
+                document.querySelectorAll('.card-tools [data-filter]').forEach((b) => b.classList.toggle('active', b.dataset.filter === filter));
+              }
+
+              // ---------- Olaylar ----------
+              $('#month').addEventListener('change', render);
+              document.querySelectorAll('[data-filter]').forEach((b) =>
+                b.addEventListener('click', () => { filter = b.dataset.filter; render(); }));
+              $('#rows').addEventListener('click', (e) => {
+                const id = e.target.closest('[data-del]')?.dataset.del;
+                if (id && confirm('Bu kayıt silinsin mi?')) { tx = tx.filter((x) => x.id !== id); save(); render(); }
+              });
+              $('#clearAll').addEventListener('click', (e) => { e.preventDefault(); if (confirm('Tüm kayıtlar silinecek. Emin misiniz?')) { tx = []; save(); render(); } });
+              $('#loadDemo').addEventListener('click', (e) => { e.preventDefault(); tx = demo(); save(); render(); });
+
+              // Ekleme formu
+              const fillCats = () => {
+                const t = document.querySelector('input[name=type]:checked').value;
+                $('#fCat').innerHTML = CATS[t].map((c) => '<option>' + c + '</option>').join('');
+                $('#txTitle').textContent = t === 'gelir' ? 'Yeni gelir' : 'Yeni gider';
+              };
+              document.querySelectorAll('input[name=type]').forEach((r) => r.addEventListener('change', fillCats));
+              document.querySelectorAll('[data-add]').forEach((b) =>
+                b.addEventListener('click', () => {
+                  document.querySelector('input[name=type][value=' + b.dataset.add + ']').checked = true;
+                  fillCats();
+                  $('#txForm').classList.remove('was-validated');
+                  $('#fDate').value = today.getFullYear() + '-' + p2(today.getMonth() + 1) + '-' + p2(today.getDate());
+                  $('#fAmount').value = ''; $('#fNote').value = '';
+                }));
+              $('#txForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const f = e.target; f.classList.add('was-validated');
+                if (!f.checkValidity()) return;
+                const date = $('#fDate').value;
+                tx.push({
+                  id: 'tx' + Date.now() + Math.random().toString(36).slice(2, 6),
+                  type: document.querySelector('input[name=type]:checked').value,
+                  category: $('#fCat').value,
+                  amount: Math.round(parseFloat($('#fAmount').value) * 100) / 100,
+                  date, note: $('#fNote').value.trim(),
+                });
+                save();
+                $('#month').value = date.slice(0, 7); // eklenen kaydın olduğu aya geç
+                bootstrap.Modal.getInstance($('#txModal')).hide();
+                render();
+              });
+
+              fillCats(); render();
+    </script>
+</body>
+</html>

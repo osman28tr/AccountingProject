@@ -1,0 +1,315 @@
+﻿
+@{
+    Layout = null;
+}
+
+@model AccountingProject.Models.DashboardViewModel
+@using System.Globalization
+@{
+    Layout = null;   // Header/sidebar'ı _Layout.cshtml'e taşırsan bu satırı kaldırıp içeriği @RenderBody() içine al.
+    var tr = new CultureInfo("tr-TR");
+    string Money(decimal v) => v.ToString("C0", tr);
+    string Delta(decimal? d) => d is null ? "Geçen ay kayıt yok"
+        : (d >= 0 ? "▲ %" : "▼ %") + Math.Abs(d.Value).ToString("0", tr) + " geçen aya göre";
+}
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <title>Muhasebe | Genel Bakış</title>
+    <script>
+        (() => {
+            let s = null; try { s = localStorage.getItem('lte-theme'); } catch {}
+            const dark = s ? s === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+        })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@fontsource/source-sans-3@5.0.12/index.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <!-- Yerel AdminLTE dosyaların varsa: ~/lib/adminlte/css/adminlte.css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4/dist/css/adminlte.min.css" />
+</head>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+        <nav class="app-header navbar navbar-expand bg-body">
+            <div class="container-fluid">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="Menüyü aç/kapat"><i class="bi bi-list"></i></a></li>
+                    <li class="nav-item d-none d-md-block"><a href="#" class="nav-link text-success" data-add="gelir" data-bs-toggle="modal" data-bs-target="#txModal"><i class="bi bi-plus-circle me-1"></i>Yeni gelir</a></li>
+                    <li class="nav-item d-none d-md-block"><a href="#" class="nav-link text-danger" data-add="gider" data-bs-toggle="modal" data-bs-target="#txModal"><i class="bi bi-dash-circle me-1"></i>Yeni gider</a></li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-lte-toggle="fullscreen" aria-label="Tam ekran">
+                            <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i><i data-lte-icon="minimize" class="bi bi-fullscreen-exit d-none"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" id="bd-theme" aria-label="Tema" data-bs-toggle="dropdown">
+                            <i class="bi bi-sun-fill" data-lte-theme-icon="light"></i><i class="bi bi-moon-fill d-none" data-lte-theme-icon="dark"></i><i class="bi bi-circle-half d-none" data-lte-theme-icon="auto"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="--bs-dropdown-min-width: 8rem">
+                            <li><button type="button" class="dropdown-item" data-bs-theme-value="light"><i class="bi bi-sun-fill me-2"></i>Açık</button></li>
+                            <li><button type="button" class="dropdown-item" data-bs-theme-value="dark"><i class="bi bi-moon-fill me-2"></i>Koyu</button></li>
+                            <li><button type="button" class="dropdown-item active" data-bs-theme-value="auto"><i class="bi bi-circle-half me-2"></i>Otomatik</button></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+            <div class="sidebar-brand"><a asp-action="Index" class="brand-link"><i class="bi bi-wallet2 brand-image fs-4 text-white"></i><span class="brand-text fw-light">Muhasebe</span></a></div>
+            <div class="sidebar-wrapper">
+                <nav class="mt-2" aria-label="Ana menü">
+                    <ul class="nav sidebar-menu flex-column">
+                        <li class="nav-item"><a asp-action="Index" asp-route-month="@Model.Month" class="nav-link active"><i class="nav-icon bi bi-speedometer"></i><p>Genel bakış</p></a></li>
+                        <li class="nav-header">İŞLEMLER</li>
+                        <li class="nav-item"><a asp-action="Index" asp-route-month="@Model.Month" asp-route-filter="hepsi" asp-fragment="islemler" class="nav-link"><i class="nav-icon bi bi-list-ul"></i><p>Tüm işlemler</p></a></li>
+                        <li class="nav-item"><a asp-action="Index" asp-route-month="@Model.Month" asp-route-filter="gelir" asp-fragment="islemler" class="nav-link"><i class="nav-icon bi bi-arrow-down-circle text-success"></i><p>Gelirler</p></a></li>
+                        <li class="nav-item"><a asp-action="Index" asp-route-month="@Model.Month" asp-route-filter="gider" asp-fragment="islemler" class="nav-link"><i class="nav-icon bi bi-arrow-up-circle text-danger"></i><p>Giderler</p></a></li>
+                        <li class="nav-header">HIZLI EKLE</li>
+                        <li class="nav-item"><a href="#" class="nav-link" data-add="gelir" data-bs-toggle="modal" data-bs-target="#txModal"><i class="nav-icon bi bi-plus-circle"></i><p>Gelir ekle</p></a></li>
+                        <li class="nav-item"><a href="#" class="nav-link" data-add="gider" data-bs-toggle="modal" data-bs-target="#txModal"><i class="nav-icon bi bi-dash-circle"></i><p>Gider ekle</p></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="app-main">
+            <div class="app-content-header">
+                <div class="container-fluid">
+                    <div class="row align-items-center g-2">
+                        <div class="col-sm-6"><h1 class="mb-0 fs-3">Genel bakış</h1></div>
+                        <div class="col-sm-6 d-flex justify-content-sm-end gap-2">
+                            <form asp-action="Index" method="get" class="d-flex">
+                                <input type="hidden" name="filter" value="@Model.Filter" />
+                                <input type="month" name="month" value="@Model.Month" class="form-control w-auto" aria-label="Ay seç" onchange="this.form.submit()" />
+                            </form>
+                            <button class="btn btn-success" data-add="gelir" data-bs-toggle="modal" data-bs-target="#txModal"><i class="bi bi-plus-lg"></i> Gelir</button>
+                            <button class="btn btn-danger" data-add="gider" data-bs-toggle="modal" data-bs-target="#txModal"><i class="bi bi-plus-lg"></i> Gider</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-content">
+                <div class="container-fluid">
+                    @if (TempData["Success"] is string ok)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">@ok<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button></div>
+                    }
+                    @if (TempData["Error"] is string err)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">@err<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button></div>
+                    }
+
+                    <div class="row">
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="info-box">
+                                <span class="info-box-icon text-bg-success shadow-sm"><i class="bi bi-arrow-down-circle-fill"></i></span>
+                                <div class="info-box-content"><span class="info-box-text">Aylık gelir</span><span class="info-box-number">@Money(Model.TotalIncome)</span><small class="text-secondary">@Delta(Model.IncomeChange)</small></div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="info-box">
+                                <span class="info-box-icon text-bg-danger shadow-sm"><i class="bi bi-arrow-up-circle-fill"></i></span>
+                                <div class="info-box-content"><span class="info-box-text">Aylık gider</span><span class="info-box-number">@Money(Model.TotalExpense)</span><small class="text-secondary">@Delta(Model.ExpenseChange)</small></div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="info-box">
+                                <span class="info-box-icon shadow-sm @(Model.Net < 0 ? "text-bg-danger" : "text-bg-primary")"><i class="bi bi-wallet-fill"></i></span>
+                                <div class="info-box-content"><span class="info-box-text">Kalan (net)</span><span class="info-box-number @(Model.Net < 0 ? "text-danger" : "")">@Money(Model.Net)</span><small class="text-secondary">Gelir - gider</small></div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="info-box">
+                                <span class="info-box-icon text-bg-warning shadow-sm"><i class="bi bi-piggy-bank-fill"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Tasarruf oranı</span>
+                                    <span class="info-box-number">@(Model.TotalIncome > 0 ? "%" + Math.Round(Model.Net / Model.TotalIncome * 100).ToString("0", tr) : "-")</span><small class="text-secondary">Gelirin ne kadarı kaldı</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8"><div class="card mb-4"><div class="card-header"><h5 class="card-title">Son 12 ay: gelir, gider ve net</h5></div><div class="card-body"><div id="trendChart"></div></div></div></div>
+                        <div class="col-lg-4"><div class="card mb-4"><div class="card-header"><h5 class="card-title">Gider dağılımı</h5></div><div class="card-body"><div id="catChart"></div></div></div></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="card-title">Aylık ortalamalar</h5></div>
+                                <div class="card-body">
+                                    <p class="text-secondary small mb-3">Son 12 ayda kaydı olan @Model.ActiveMonthCount ay üzerinden hesaplandı.</p>
+                                    <div class="d-flex justify-content-between mb-2"><span>Ortalama gelir</span><strong class="text-success">@Money(Model.AvgIncome)</strong></div>
+                                    <div class="d-flex justify-content-between mb-2"><span>Ortalama gider</span><strong class="text-danger">@Money(Model.AvgExpense)</strong></div>
+                                    <div class="d-flex justify-content-between mb-3"><span>Ortalama kalan</span><strong class="@(Model.AvgNet < 0 ? "text-danger" : "text-primary")">@Money(Model.AvgNet)</strong></div>
+                                    <hr />
+                                    <p class="text-center mb-2"><strong>En çok harcanan kategoriler</strong></p>
+                                    @foreach (var c in Model.ExpenseByCategory.Take(5))
+                                    {
+                                        <div class="progress-group">
+                                            @c.Name<span class="float-end"><b>@Money(c.Total)</b> (%@c.Percent)</span>
+                                            <div class="progress progress-sm"><div class="progress-bar text-bg-danger" style="width:@(c.Percent)%"></div></div>
+                                        </div>
+                                    }
+                                    @if (!Model.ExpenseByCategory.Any())
+                                    {
+                                        <p class="text-secondary text-center">Bu ay henüz gider yok.</p>
+                                    }
+                                    @if (Model.BiggestAmount is decimal big)
+                                    {
+                                        <div class="small text-secondary mt-3">En büyük gider: @Money(big) (@Model.BiggestCategory@(string.IsNullOrEmpty(Model.BiggestNote) ? "" : ", " + Model.BiggestNote))</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-8" id="islemler">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title">İşlemler</h5>
+                                    <div class="card-tools btn-group btn-group-sm">
+                                        <a asp-action="Index" asp-route-month="@Model.Month" asp-route-filter="hepsi" asp-fragment="islemler" class="btn btn-outline-secondary @(Model.Filter == "hepsi" ? "active" : "")">Tümü</a>
+                                        <a asp-action="Index" asp-route-month="@Model.Month" asp-route-filter="gelir" asp-fragment="islemler" class="btn btn-outline-secondary @(Model.Filter == "gelir" ? "active" : "")">Gelir</a>
+                                        <a asp-action="Index" asp-route-month="@Model.Month" asp-route-filter="gider" asp-fragment="islemler" class="btn btn-outline-secondary @(Model.Filter == "gider" ? "active" : "")">Gider</a>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0 table-responsive">
+                                    <table class="table table-striped align-middle mb-0">
+                                        <thead><tr><th>Tarih</th><th>Tür</th><th>Kategori</th><th>Açıklama</th><th class="text-end">Tutar</th><th></th></tr></thead>
+                                        <tbody>
+                                            @foreach (var t in Model.Transactions)
+                                            {
+                                                <tr>
+                                                    <td>@t.Date.ToString("d", tr)</td>
+                                                    <td><span class="badge text-bg-@(t.IsIncome ? "success" : "danger")">@(t.IsIncome ? "Gelir" : "Gider")</span></td>
+                                                    <td>@t.CategoryName</td>
+                                                    <td>@t.Note</td>
+                                                    <td class="text-end fw-semibold text-@(t.IsIncome ? "success" : "danger")">@(t.IsIncome ? "+" : "-")@Money(t.Amount)</td>
+                                                    <td class="text-end">
+                                                        <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Bu kayıt silinsin mi?')">
+                                                            <input type="hidden" name="id" value="@t.Id" /><input type="hidden" name="month" value="@Model.Month" /><input type="hidden" name="filter" value="@Model.Filter" />
+                                                            <button class="btn btn-sm btn-outline-secondary" aria-label="Sil"><i class="bi bi-trash"></i></button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            }
+                                            @if (!Model.Transactions.Any())
+                                            {
+                                                <tr><td colspan="6" class="text-center text-secondary py-4">Bu ay için kayıt yok. Sağ üstteki "Gelir" veya "Gider" ile ilk kaydı ekleyin.</td></tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <div class="float-end d-none d-sm-inline">Muhasebe</div>
+            <strong>&copy; @DateTime.Now.Year</strong>
+        </footer>
+    </div>
+
+    <!-- İşlem ekleme penceresi -->
+    <div class="modal fade" id="txModal" tabindex="-1" aria-labelledby="txTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <form asp-action="Create" method="post" class="modal-content" id="txForm">
+                <div class="modal-header"><h5 class="modal-title" id="txTitle">Yeni işlem</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button></div>
+                <div class="modal-body">
+                    <div class="btn-group w-100 mb-3" role="group" aria-label="İşlem türü">
+                        <input type="radio" class="btn-check" name="txType" id="tGelir" value="gelir" checked /><label class="btn btn-outline-success" for="tGelir">Gelir</label>
+                        <input type="radio" class="btn-check" name="txType" id="tGider" value="gider" /><label class="btn btn-outline-danger" for="tGider">Gider</label>
+                    </div>
+                    <div class="mb-3"><label for="fAmount" class="form-label">Tutar (₺)</label><input type="number" id="fAmount" name="Amount" class="form-control" min="0.01" step="0.01" required /></div>
+                    <div class="row">
+                        <div class="col-6 mb-3"><label for="fCat" class="form-label">Kategori</label><select id="fCat" name="CategoryId" class="form-select" required></select></div>
+                        <div class="col-6 mb-3"><label for="fDate" class="form-label">Tarih</label><input type="date" id="fDate" name="Date" class="form-control" required /></div>
+                    </div>
+                    <div class="mb-1"><label for="fNote" class="form-label">Açıklama (isteğe bağlı)</label><input type="text" id="fNote" name="Note" class="form-control" maxlength="80" /></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button><button type="submit" class="btn btn-primary">Kaydet</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@4/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"></script>
+    <script>
+        // Grafikler açık/koyu temayı takip eder
+        (() => {
+            const mode = () => (document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light');
+            globalThis.Apex ||= {};
+            Apex.theme = { mode: mode() };
+            Apex.chart = Object.assign(Apex.chart || {}, { background: 'transparent' });
+            new MutationObserver(() => {
+                Apex.theme = { mode: mode() };
+                for (const { chart } of Apex._chartInstances || []) chart.updateOptions({ theme: { mode: mode() } }, false, false);
+            }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
+        })();
+
+        // Controller'dan gelen veriler
+        const trend = @Json.Serialize(Model.Trend);
+        const expenseCats = @Json.Serialize(Model.ExpenseByCategory);
+        const categories = @Json.Serialize(Model.Categories);
+        const fmt = (n) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+
+        new ApexCharts(document.querySelector('#trendChart'), {
+            chart: { id: 'trend', type: 'line', height: 320, toolbar: { show: false } },
+            series: [
+                { name: 'Gelir', type: 'column', data: trend.map(x => x.income) },
+                { name: 'Gider', type: 'column', data: trend.map(x => x.expense) },
+                { name: 'Net', type: 'line', data: trend.map(x => x.net) }
+            ],
+            colors: ['#198754', '#dc3545', '#0d6efd'],
+            stroke: { width: [0, 0, 3], curve: 'smooth' },
+            plotOptions: { bar: { columnWidth: '55%', borderRadius: 3 } },
+            dataLabels: { enabled: false },
+            xaxis: { categories: trend.map(x => x.label) },
+            yaxis: { labels: { formatter: v => Math.round(v / 1000) + 'B' } },
+            tooltip: { y: { formatter: fmt } }
+        }).render();
+
+        new ApexCharts(document.querySelector('#catChart'), {
+            chart: { id: 'cat', type: 'donut', height: 320 },
+            series: expenseCats.map(x => x.total),
+            labels: expenseCats.map(x => x.name),
+            colors: ['#0d6efd', '#20c997', '#ffc107', '#d63384', '#6f42c1', '#fd7e14', '#adb5bd'],
+            dataLabels: { enabled: false },
+            legend: { position: 'bottom' },
+            tooltip: { y: { formatter: fmt } },
+            noData: { text: 'Bu ay gider yok' }
+        }).render();
+
+        // Ekleme penceresi: seçilen türe göre kategorileri doldur
+        const $ = (s) => document.querySelector(s);
+        const fillCats = () => {
+            const t = document.querySelector('input[name=txType]:checked').value;
+            $('#fCat').innerHTML = categories.filter(c => c.type === t).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            $('#txTitle').textContent = t === 'gelir' ? 'Yeni gelir' : 'Yeni gider';
+        };
+        document.querySelectorAll('input[name=txType]').forEach(r => r.addEventListener('change', fillCats));
+        document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => {
+            document.querySelector(`input[name=txType][value=${b.dataset.add}]`).checked = true;
+            fillCats();
+            const d = new Date(), p = n => String(n).padStart(2, '0');
+            $('#fDate').value = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+            $('#fAmount').value = ''; $('#fNote').value = '';
+        }));
+        fillCats();
+    </script>
+</body>
+</html>
+
