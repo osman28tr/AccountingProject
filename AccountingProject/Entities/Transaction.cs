@@ -8,16 +8,18 @@
 		public int? DebtId { get; set; }
 		public decimal Amount { get; set; }
 		public DateTime TransactionDate { get; set; }
-		public string Note { get; set; }
-		public Category Category { get; set; }
-		public PaymentMethodType PaymentType { get; set; }
+		public string? Note { get; set; }
+		public PaymentMethod? PaymentMethod { get; set; }   // Eski kayıtlarda boş olabilir
+		public Category Category { get; set; } = null!;
 		public FixedExpense? FixedExpense { get; set; }
 		public Debt? Debt { get; set; }
 	}
-	public enum PaymentMethodType : byte
+
+	// byte alt tipi sayesinde SQL Server'da tinyint olur
+	public enum PaymentMethod : byte
 	{
 		Card = 1,
 		Cash = 2,
-		Transfer = 3
+		BankTransfer = 3
 	}
 }
