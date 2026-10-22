@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccountingProject.Migrations
 {
     [DbContext(typeof(AppDbContex))]
-    [Migration("20261006153636_v2_entities_added")]
-    partial class v2_entities_added
+    [Migration("20261022115620_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
