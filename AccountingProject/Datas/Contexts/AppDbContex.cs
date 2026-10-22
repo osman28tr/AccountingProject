@@ -45,7 +45,7 @@ namespace AccountingProject.Datas.Contexts
 			new Category { Id = 20, Name = "Elektrik, su, internet", Type = Type.FixedExpense },
 			new Category { Id = 21, Name = "Dijital abonelikler", Type = Type.FixedExpense }
 			);
-
+			//test
 			//Transaction
 
 			modelBuilder.Entity<Transaction>().HasData(TransactionSeedData.Items);
