@@ -7,74 +7,53 @@ namespace AccountingProject.Models
 		public string Month { get; set; } = "";              // yyyy-MM
 		public string Filter { get; set; } = "hepsi";        // hepsi | gelir | gider
 
-		// Seçili ay özeti
+		// Seçili ay
 		public decimal TotalIncome { get; set; }
 		public decimal TotalExpense { get; set; }
 		public decimal Net => TotalIncome - TotalExpense;
-		public decimal? IncomeChange { get; set; }           // Geçen aya göre % (geçen ay 0 ise null)
+		public decimal? IncomeChange { get; set; }           // Geçen aya göre %, geçen ay 0 ise null
 		public decimal? ExpenseChange { get; set; }
+		public TransactionItem? BiggestExpense { get; set; }
+		public List<CategoryTotalItem> ExpenseByCategory { get; set; } = new();
 
-		// Son 12 ay ortalamaları (kaydı olan aylar üzerinden)
-		public int ActiveMonthCount { get; set; }
+		// Son 12 ay
+		public List<MonthlyTrendItem> Trend { get; set; } = new();
 		public decimal AvgIncome { get; set; }
 		public decimal AvgExpense { get; set; }
 		public decimal AvgNet => AvgIncome - AvgExpense;
 
-		public decimal? BiggestAmount { get; set; }
-		public string? BiggestCategory { get; set; }
-		public string? BiggestNote { get; set; }
+		// Havuz bütçesi
+		public decimal PoolAmount { get; set; }
+		public decimal PoolUsed { get; set; }                // Yıl başından seçili aya kadar toplam gider
+		public decimal PoolRemaining => PoolAmount - PoolUsed;
+		public int PoolUsedPercent => PoolAmount > 0 ? (int)Math.Round(PoolUsed / PoolAmount * 100) : 0;
 
-		public List<MonthlyTrendItem> Trend { get; set; } = new();
-		public List<CategoryTotalItem> ExpenseByCategory { get; set; } = new();
-		public List<TransactionListItem> Transactions { get; set; } = new();
+		// Sabit giderler
+		public List<FixedExpenseItem> FixedExpenses { get; set; } = new();
+		public decimal FixedTotal => FixedExpenses.Sum(f => f.Amount);
+		public decimal? FixedIncomePercent => TotalIncome > 0 ? Math.Round(FixedTotal / TotalIncome * 100) : null;
+
+		// Borçlar
+		public List<DebtItem> Debts { get; set; } = new();
+		public decimal DebtRemaining => Debts.Sum(d => d.RemainingAmount);
+		public int OpenDebtCount => Debts.Count(d => d.RemainingAmount > 0);
+		public int DebtPaidPercent
+		{
+			get
+			{
+				var total = Debts.Sum(d => d.TotalAmount);
+				return total > 0 ? (int)Math.Round((total - DebtRemaining) / total * 100) : 0;
+			}
+		}
+
+		public List<TransactionItem> Transactions { get; set; } = new();
 		public List<CategoryOption> Categories { get; set; } = new();
 	}
 
-	public class MonthlyTrendItem
-	{
-		public string Label { get; set; } = "";
-		public decimal Income { get; set; }
-		public decimal Expense { get; set; }
-		public decimal Net { get; set; }
-		public bool HasData { get; set; }
-	}
-
-	public class CategoryTotalItem
-	{
-		public string Name { get; set; } = "";
-		public decimal Total { get; set; }
-		public int Percent { get; set; }
-	}
-
-	public class TransactionListItem
-	{
-		public long Id { get; set; }
-		public DateTime Date { get; set; }
-		public string CategoryName { get; set; } = "";
-		public bool IsIncome { get; set; }
-		public decimal Amount { get; set; }
-		public string? Note { get; set; }
-	}
-
-	public class CategoryOption
-	{
-		public int Id { get; set; }
-		public string Name { get; set; } = "";
-		public string Type { get; set; } = "";               // gelir | gider
-	}
-
-	public class TransactionCreateViewModel
-	{
-		[Range(1, int.MaxValue, ErrorMessage = "Kategori seçin.")]
-		public int CategoryId { get; set; }
-
-		[Range(0.01, 999999999, ErrorMessage = "0'dan büyük bir tutar girin.")]
-		public decimal Amount { get; set; }
-
-		[Required(ErrorMessage = "Tarih seçin.")]
-		public DateTime? Date { get; set; }
-
-		[StringLength(80)]
-		public string? Note { get; set; }
-	}
+	public record MonthlyTrendItem(string Label, decimal Income, decimal Expense) { public decimal Net => Income - Expense; }
+	public record CategoryTotalItem(string Name, decimal Total, int Percent);
+	public record CategoryOption(int Id, string Name, bool IsIncome);
+	public record TransactionItem(int Id, DateTime Date, string CategoryName, bool IsIncome, decimal Amount, string? Note);
+	public record FixedExpenseItem(int Id, string CategoryName, decimal Amount, int DayOfMonth, bool IsPosted);
+	public record DebtItem(int Id, string Creditor, decimal TotalAmount, decimal RemainingAmount, DateTime? DueDate);
 }

@@ -1,6 +1,6 @@
 ﻿using AccountingProject.Entities;
 using Microsoft.EntityFrameworkCore;
-using Type = AccountingProject.Entities.Type;
+using Type = AccountingProject.Entities.TransactionType;
 
 namespace AccountingProject.Datas.Contexts
 {
@@ -18,7 +18,7 @@ namespace AccountingProject.Datas.Contexts
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Category>().Property(c => c.Type).HasConversion<string>().HasMaxLength(50);
-			modelBuilder.Entity<Transaction>().Property(c => c.PaymentType).HasConversion<string>().HasMaxLength(10);
+			modelBuilder.Entity<Transaction>().Property(c => c.PaymentMethod).HasConversion<string>().HasMaxLength(20);
 
 			//Category
 
@@ -64,15 +64,15 @@ namespace AccountingProject.Datas.Contexts
 			modelBuilder.Entity<FixedExpense>().Property(f => f.Amount).IsRequired().HasPrecision(18, 2);
 
 			modelBuilder.Entity<FixedExpense>().HasData(
-			new FixedExpense { Id = 1, CategoryId = 19, Amount = 16000m,  DayOfMonth = 3 },
+			new FixedExpense { Id = 1, CategoryId = 19, Amount = 16000m, DayOfMonth = 3 },
 			new FixedExpense { Id = 2, CategoryId = 20, Amount = 3200m, DayOfMonth = 10 },
 			new FixedExpense { Id = 3, CategoryId = 21, Amount = 650m, DayOfMonth = 5 });
 
 			//Debt
 
-			modelBuilder.Entity<Debt>().Property(d => d.Amount).IsRequired().HasPrecision(18, 2);
+			modelBuilder.Entity<Debt>().Property(d => d.TotalAmount).IsRequired().HasPrecision(18, 2);
 			modelBuilder.Entity<Debt>().Property(d => d.DueDate).HasColumnType("date");
-			modelBuilder.Entity<Debt>().HasData(new Debt { Id = 1, Creditor = "Banka kredisi", Amount = 150000m });
+			modelBuilder.Entity<Debt>().HasData(new Debt { Id = 1, Creditor = "Banka kredisi", TotalAmount = 150000m });
 
 		}
 	}
@@ -122,9 +122,9 @@ namespace AccountingProject.Datas.Contexts
 		new() { Id = 39, CategoryId = 6, Amount = 7991m, TransactionDate = new DateTime(2026, 9, 12), Note = "Aylık market" },
 		new() { Id = 40, CategoryId = 8, Amount = 1623m, TransactionDate = new DateTime(2026, 9, 8), Note = "Ulaşım kartı ve yakıt" },
 		new() { Id = 41, CategoryId = 9, Amount = 3519m, TransactionDate = new DateTime(2026, 9, 20), Note = "Sinema, dışarıda yemek" },
-		new() { Id = 42, CategoryId = 18, Amount = 10000m, TransactionDate = new DateTime(2026, 7, 20), PaymentType = PaymentMethodType.Transfer, DebtId = 1, Note = "Borç ödemesi: Banka kredisi" },
-		new() { Id = 43, CategoryId = 18, Amount = 10000m, TransactionDate = new DateTime(2026, 8, 20), PaymentType = PaymentMethodType.Transfer, DebtId = 1, Note = "Borç ödemesi: Banka kredisi" },
-		new() { Id = 44, CategoryId = 18, Amount = 10000m, TransactionDate = new DateTime(2026, 9, 20), PaymentType = PaymentMethodType.Transfer, DebtId = 1, Note = "Borç ödemesi: Banka kredisi" },
+		new() { Id = 42, CategoryId = 18, Amount = 10000m, TransactionDate = new DateTime(2026, 7, 20), PaymentMethod = PaymentMethod.BankTransfer, DebtId = 1, Note = "Borç ödemesi: Banka kredisi" },
+		new() { Id = 43, CategoryId = 18, Amount = 10000m, TransactionDate = new DateTime(2026, 8, 20), PaymentMethod = PaymentMethod.BankTransfer, DebtId = 1, Note = "Borç ödemesi: Banka kredisi" },
+		new() { Id = 44, CategoryId = 18, Amount = 10000m, TransactionDate = new DateTime(2026, 9, 20), PaymentMethod = PaymentMethod.BankTransfer, DebtId = 1, Note = "Borç ödemesi: Banka kredisi" },
 	};
 	}
 }
